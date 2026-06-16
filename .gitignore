@@ -1,1 +1,16 @@
-".env" 
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+.env
+uploads/
+chroma_db/
+documents.db
+*.sqlite3
+.DS_Store
+.idea/
+.vscode/
