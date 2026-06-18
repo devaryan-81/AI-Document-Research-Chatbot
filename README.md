@@ -83,7 +83,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ### Frontend (Streamlit)
 
-Deploy on [Streamlit Community Cloud]([https://streamlit.io/cloud](https://ai-document-research-chatbot-bsyheusjrhzqerx5uypjb4.streamlit.app/)):
+Deploy on (https://ai-document-research-chatbot-bsyheusjrhzqerx5uypjb4.streamlit.app/)
 
 1. Connect your GitHub repository
 2. Set main file as `app.py`
