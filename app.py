@@ -63,7 +63,8 @@ if st.button("Upload All", type="primary") and uploaded_files:
     if results:
         st.success(f"Successfully uploaded {len(results)} file(s)")
         st.dataframe(pd.DataFrame(results), use_container_width=True)
-
+        st.rerun()
+        
 st.divider()
 
 # ---------- 2. Document Library ----------
