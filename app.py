@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import uuid
 
-API = "http://localhost:8000"
+API = "http://localhost:8000" or "https://ai-document-research-chatbot.onrender.com"
 
 st.set_page_config(page_title="Document Research Chatbot", layout="wide")
 
