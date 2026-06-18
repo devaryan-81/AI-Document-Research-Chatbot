@@ -5,6 +5,7 @@ langchain
 langchain-groq
 langchain-chroma
 langchain-mistralai
+langchain-text-splitters
 chromadb
 pymupdf
 pytesseract
