@@ -35,8 +35,10 @@ Rules:
 
 checkpointer = InMemorySaver()
 
+llm_with_tools = llm.bind_tools(ALL_TOOLS)
+
 agent_executor = create_react_agent(
-    model=llm,
+    model=llm_with_tools,
     tools=ALL_TOOLS,
     prompt=SYSTEM_PROMPT,
     checkpointer=checkpointer,
