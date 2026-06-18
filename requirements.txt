@@ -4,12 +4,12 @@ python-multipart
 langchain
 langchain-groq
 langchain-chroma
-langchain-huggingface
+langchain-mistralai
 chromadb
-sentence-transformers
 pymupdf
 pytesseract
 pillow
 python-dotenv
 streamlit
 requests
+langgraph

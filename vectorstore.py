@@ -1,9 +1,14 @@
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_mistralai import MistralAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_classic.schema import Document as LCDocument
+from langchain_core.documents import Document as LCDocument
+import os
 
-embeddings = HuggingFaceEmbeddings(model_name = "all-MiniLM-L6-v2")
+embeddings = MistralAIEmbeddings(
+    model="mistral-embed",
+    api_key=os.getenv("MISTRAL_API_KEY")
+)
+
 vectorstore = Chroma(
     persist_directory="./chroma_db",
     embedding_function=embeddings,
@@ -16,7 +21,6 @@ splitter = RecursiveCharacterTextSplitter(
 )
 
 def add_document_chunks(doc_id, chunks):
-    """chunks: list of {page, paragraph, sentence, text} from processor.py"""
     docs = []
     for c in chunks:
         docs.append(LCDocument(
@@ -25,7 +29,6 @@ def add_document_chunks(doc_id, chunks):
         ))
     if not docs:
         return 0
-    
     split_docs = splitter.split_documents(docs)
     vectorstore.add_documents(split_docs)
     return len(split_docs)
@@ -39,4 +42,3 @@ def get_retriever(doc_ids=None, k=5):
 
 def get_collection_count():
     return vectorstore._collection.count()
-    
