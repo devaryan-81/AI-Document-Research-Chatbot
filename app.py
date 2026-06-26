@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import uuid
+import time
 
 API = "https://ai-document-research-chatbot.onrender.com"
        
@@ -17,16 +18,48 @@ if "chat_log" not in st.session_state:
 st.title("📄 Agentic Document Research Chatbot")
 
 # ---------- Backend health check ----------
-def check_backend():
-    try:
-        r = requests.get(f"{API}/health", timeout=3)
-        return r.status_code == 200, r.json()
-    except requests.exceptions.ConnectionError:
-        return False, None
+def request_with_retry(method, url, **kwargs):
+    max_retries = 5
+    delay = 4
 
-healthy, health_data = check_backend()
+    for attempt in range(max_retries):
+        try:
+            r = requests.request(method, url, timeout=kwargs.pop("timeout", 30), **kwargs)
+
+            if r.status_code >= 500:
+                raise Exception("Server waking up")
+
+            return r
+
+        except Exception:
+            if attempt < max_retries - 1:
+                time.sleep(delay)
+            else:
+                raise
+
+def check_backend_with_retry(max_retries=5, delay=4):
+    for attempt in range(max_retries):
+        try:
+            r = requests.get(f"{API}/health", timeout=5)
+
+            if r.status_code == 200:
+                return True, r.json()
+
+        except Exception:
+            pass
+
+        if attempt < max_retries - 1:
+            time.sleep(delay)
+
+    return False, None
+
+with st.spinner("🚀 Waking up backend server (first load may take ~30 sec)..."):
+    healthy, health_data = check_backend_with_retry()
+    
 if not healthy:
-    st.error(f"⚠️ Backend not reachable at {API}. Start it with: `uvicorn main:app --reload --port 8000`")
+    st.error("⚠️ Backend is still waking up. Please wait a few seconds and retry.")
+    if st.button("🔄 Retry"):
+        st.rerun()
     st.stop()
 else:
     st.success(f"Backend connected — {health_data.get('indexed_chunks', 0)} chunks indexed")
@@ -53,7 +86,7 @@ if st.button("Upload All", type="primary") and uploaded_files:
         try:
             files = {"file": (f.name, f.getvalue())}
             data = {"author": author} if author else {}
-            r = requests.post(f"{API}/upload", files=files, data=data, timeout=120)
+            r = request_with_retry("POST", f"{API}/upload", files=files, data=data, timeout=120)
             r.raise_for_status()
             results.append(r.json())
         except Exception as e:
@@ -86,7 +119,7 @@ if filter_type:
     params["file_type"] = filter_type
 
 try:
-    docs = requests.get(f"{API}/documents", params=params, timeout=10).json()
+    docs = request_with_retry("GET", f"{API}/documents", params=params, timeout=10).json()
 except Exception as e:
     st.error(f"Could not fetch documents: {e}")
     docs = []
@@ -140,7 +173,7 @@ if query:
                 data = {"query": query, "session_id": st.session_state.session_id}
                 if selected_docs:
                     data["doc_ids"] = ",".join(selected_docs)
-                r = requests.post(f"{API}/query", data=data, timeout=180)
+                r = request_with_retry("POST", f"{API}/query", data=data, timeout=180)
                 r.raise_for_status()
                 response = r.json().get("response", "No response received.")
             except requests.exceptions.Timeout:
